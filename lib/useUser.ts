@@ -4,28 +4,36 @@ interface Data_Post {
   title: string;
   description: string;
   tags: string[];
-  image: string;
+  image_url: string;
   location: [number, number];
 }
 const supabase = createSupabaseClient();
 
 export const uploadImage = async (file: File) => {
-  const fileName = `${Date.now()}-${file.name}`;
-  const { data: bird, error } = await supabase.storage
-    .from("image_uploads") // Replace with your Supabase bucket name
-    .upload(fileName, file);
+  try {
+    const fileName = `${Date.now()}-${file.name}`;
+    const { data, error } = await supabase.storage
+      .from("image_uploads") // Make sure this bucket exists in your Supabase
+      .upload(fileName, file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
 
-  if (error) {
-    console.error("Image upload failed:", error.message);
+    if (error) {
+      console.error("Image upload failed:", error.message);
+      return null;
+    }
+
+    // Get the public URL using the same bucket name
+    const { data: publicUrlData } = supabase.storage
+      .from("image_uploads") // Use the same bucket name here
+      .getPublicUrl(fileName);
+
+    return publicUrlData?.publicUrl;
+  } catch (error) {
+    console.error("Upload error:", error);
     return null;
   }
-
-  // Return the public URL
-  const { data } = supabase.storage
-    .from("your-bucket-name")
-    .getPublicUrl(fileName);
-
-  return data?.publicUrl;
 };
 
 export const createPost = async (postData: Data_Post) => {
@@ -33,6 +41,7 @@ export const createPost = async (postData: Data_Post) => {
     .from("memories2")
     .insert(postData)
     .select();
+  console.log(data);
 
   if (error) {
     console.error("Error inserting post:", error.message);
