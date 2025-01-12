@@ -30,7 +30,7 @@ export const uploadImage = async (file: File) => {
 
 export const createPost = async (postData: Data_Post) => {
   const { data, error } = await supabase
-    .from("memories")
+    .from("memories2")
     .insert(postData)
     .select();
 
