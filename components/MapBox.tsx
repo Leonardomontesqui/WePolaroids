@@ -72,10 +72,10 @@ export default function MapBox() {
     el.className = "memory-marker";
     el.innerHTML = `
       <div class="marker-container">
-        <div class="bg-white flex flex-col justify-center items-center rounded-lg shadow-lg p-2 border border-gray-200 w-[130px] h-[150px] hover:shadow-xl transition-all duration-300 my-auto">
+        <div class="bg-white flex flex-col justify-center items-center rounded-lg shadow-lg p-2 border border-gray-200 w-[80px] h-[100px] hover:shadow-xl transition-all duration-300 my-auto">
           <img src="${memory.image_url}" 
                alt="${memory.title}"
-               class="w-[100px] h-20 object-cover rounded-lg mb-1" />
+               class="w-28 h-32 object-cover rounded-lg mb-1" />
         </div>
         
         <!-- Hover Card -->
