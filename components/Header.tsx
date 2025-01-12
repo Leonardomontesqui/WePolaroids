@@ -2,18 +2,13 @@ import React from "react";
 
 export default function Header() {
   return (
-    <div className="flex flex-col justify-between p-4 bg-gray-800 text-white absolute z-50 mt-4 mx-4 gap-6 bg-[#33343F] rounded-xl w-[240px]">
-      <h1 className="text-[40px] font-bold leading-tight">
-        Spotting Dinasours
+    <div className="flex flex-col p-5 absolute z-50 mt-4 mx-4 gap-2 items-center rounded-xl w-[274px]  bg-cream">
+      <h1 className="text-[96px] text-[#7A7A7A] text-blue font-bold leading-none w-full">
+        We.
       </h1>
-      <div className="flex flex-col gap-2">
-        <p className="justify-left">1. Click a point on the map</p>
-        <p className="justify-left">2. Share a memory</p>
-      </div>
-
-      {/* <button className="w-full border rounded-lg bg-[#38409C] border-[#4D5AEE] py-2 disabled:opacity-50">
-        Report
-      </button> */}
+      <p className="justify-left text-[#63635D] text-[20px] font-semibold w-full">
+        everyones photo album
+      </p>
     </div>
   );
 }

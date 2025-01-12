@@ -27,14 +27,9 @@ interface MarkerPosition {
 }
 
 const tags = [
-  { id: "pothole", label: "Pothole" },
-  { id: "park", label: "Park" },
-  { id: "streetlight", label: "Streetlight" },
-  { id: "graffiti", label: "Graffiti" },
-  { id: "trash", label: "Trash" },
-  { id: "sidewalk", label: "Sidewalk" },
-  { id: "traffic", label: "Traffic" },
-  { id: "noise", label: "Noise" },
+  { id: "meh", label: "meh" },
+  { id: "cool", label: "cool" },
+  { id: "swaggy", label: "swaggy" },
 ];
 
 export function ReportForm({
@@ -92,21 +87,16 @@ export function ReportForm({
   };
 
   return (
-    <Card
-      className={cn("w-full max-w-md bg-gray-900 text-gray-100", className)}
-    >
+    <Card className={cn("w-full max-w-md bg-cream text-semiBlack", className)}>
       <CardHeader>
-        <div className="flex justify-between items-start">
+        <div className="flex justify-between items-center w-full">
           <div>
-            <CardTitle className="text-gray-100">Share something</CardTitle>
-            {/* <CardDescription className="text-gray-400">
-              Share a cool moment
-            </CardDescription> */}
+            <CardTitle>Leave your mark</CardTitle>
           </div>
           <Button
             variant="ghost"
             size="icon"
-            className="text-gray-400 hover:text-gray-100"
+            className="text-semiBlack hover:text-gray-300"
             aria-label="Close form"
             onClick={onClose}
           >
@@ -119,7 +109,7 @@ export function ReportForm({
           {state.success ? (
             <p className="text-green-400 flex items-center gap-2 text-sm">
               <Check className="size-4" />
-              Your report has been submitted. Thank you for your contribution.
+              Added!
             </p>
           ) : null}
           <div className="space-y-1">
@@ -127,14 +117,14 @@ export function ReportForm({
               htmlFor="title"
               className={cn(state.errors?.title && "text-red-400")}
             >
-              Title <span aria-hidden="true">*</span>
+              Caption <span aria-hidden="true">*</span>
             </Label>
             <Input
               id="title"
               name="title"
-              placeholder="Brief title of the issue"
+              placeholder="5 words maximum"
               className={cn(
-                "bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-500",
+                "bg-white border-[#E8E5E5] text-semiBlack placeholder-gray-500",
                 state.errors?.title &&
                   "border-red-400 focus-visible:ring-red-400"
               )}
@@ -149,7 +139,7 @@ export function ReportForm({
               </p>
             )}
           </div>
-          <div className="space-y-1">
+          {/* <div className="space-y-1">
             <Label
               htmlFor="location"
               className={cn(state.errors?.location && "text-red-400")}
@@ -161,7 +151,7 @@ export function ReportForm({
               name="location"
               placeholder="123 Main St, City, State"
               className={cn(
-                "bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-500",
+                "bg-white border-gray-700 text-semiBlack placeholder-gray-500",
                 state.errors?.location &&
                   "border-red-400 focus-visible:ring-red-400"
               )}
@@ -175,12 +165,12 @@ export function ReportForm({
                 {state.errors.location}
               </p>
             )}
-          </div>
+          </div> */}
           <div className="space-y-1">
             <Label className={cn(state.errors?.tags && "text-red-400")}>
               Tags <span aria-hidden="true">*</span>
             </Label>
-            <ScrollArea className="w-full whitespace-nowrap rounded-md border border-gray-700">
+            <ScrollArea className="w-full whitespace-nowrap rounded-md bg-white border border-[#E8E5E5]">
               <div className="flex w-max space-x-2 p-2">
                 {tags.map((tag) => (
                   <Badge
@@ -191,8 +181,8 @@ export function ReportForm({
                     className={cn(
                       "cursor-pointer",
                       selectedTags.includes(tag.id)
-                        ? "bg-blue-600 hover:bg-blue-700"
-                        : "bg-gray-800 hover:bg-gray-700"
+                        ? "bg-[#FDF47B] text-[#BD9846] hover:bg-[#FDF47B]"
+                        : "bg-white hover:bg-[#E2E2E2]"
                     )}
                     onClick={() => toggleTag(tag.id)}
                   >
@@ -221,9 +211,9 @@ export function ReportForm({
             <Textarea
               id="description"
               name="description"
-              placeholder="Describe the issue you're reporting..."
+              placeholder="Share your thoughts..."
               className={cn(
-                "bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-500",
+                "bg-white border-[#E8E5E5] text-semiBlack placeholder-gray-500",
                 state.errors?.description &&
                   "border-red-400 focus-visible:ring-red-400"
               )}
@@ -248,7 +238,7 @@ export function ReportForm({
             <div className="flex items-center justify-center w-full">
               <label
                 htmlFor="image"
-                className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-700 border-dashed rounded-lg cursor-pointer bg-gray-800 hover:bg-gray-700"
+                className="flex flex-col items-center justify-center w-full h-64 border-2 border-[#E8E5E5] border-dashed rounded-lg cursor-pointer bg-white hover:bg-gray-100"
               >
                 {selectedImage || cameraImage ? (
                   <img
@@ -257,8 +247,8 @@ export function ReportForm({
                     className="w-full h-full object-cover rounded-lg"
                   />
                 ) : (
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <Upload className="w-8 h-8 mb-4 text-gray-400" />
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6 ">
+                    <Upload className="w-8 h-8 mb-4 text-gray-400 " />
                     <p className="mb-2 text-sm text-gray-400">
                       <span className="font-semibold">Click to upload</span> or
                       drag and drop
@@ -279,14 +269,14 @@ export function ReportForm({
                 />
               </label>
             </div>
-            <Button
+            {/* <Button
               type="button"
               variant="outline"
-              className="mt-4 border-gray-700 text-black hover:bg-gray-700"
+              className="mt-4 border-[#E8E5E5] text-black hover:bg-[#ECECEC] w-full"
               onClick={handleCameraToggle}
             >
               <Camera className="mr-2" /> Open Camera
-            </Button>
+            </Button> */}
             {isCameraOpen && (
               <div className="relative mt-4 rounded-lg bg-gray-800 p-2">
                 <Webcam
@@ -320,9 +310,9 @@ export function ReportForm({
           <Button
             type="submit"
             disabled={pending}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+            className="w-full bg-blue hover:bg-[#4D58D1] text-white"
           >
-            {pending ? "Submitting..." : "Submit Report"}
+            {pending ? "Sharing..." : "Share"}
           </Button>
         </CardFooter>
       </form>

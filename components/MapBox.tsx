@@ -40,6 +40,35 @@ export default function MapBox() {
     setSelectedLocation(null);
   };
 
+  const handleMapClick = (e: mapboxgl.MapMouseEvent) => {
+    const lngLat = e.lngLat;
+
+    // Clear any existing marker
+    clearCurrentMarker();
+
+    // Create a new marker element
+    const el = document.createElement("div");
+    el.className = "custom-marker";
+    el.innerHTML = `
+      <div class="bg-white rounded-lg shadow-lg p-2 border border-gray-200">
+        <div class="w-4 h-4 bg-red-500 rounded-full mx-auto mb-1"></div>
+        <p class="text-xs text-gray-600 text-center">Selected Location</p>
+      </div>
+    `;
+
+    // Create and add the new marker
+    const newMarker = new mapboxgl.Marker({
+      element: el,
+      anchor: "bottom",
+    })
+      .setLngLat(lngLat)
+      .addTo(mapRef.current!);
+
+    // Update refs and state
+    activeMarkerRef.current = newMarker;
+    setSelectedLocation({ lng: lngLat.lng, lat: lngLat.lat });
+  };
+
   const createCustomMarker = (memory: Memory) => {
     const el = document.createElement("div");
     el.className = "memory-marker";
@@ -58,29 +87,6 @@ export default function MapBox() {
     });
   };
 
-  const createNewMarker = (lngLat: { lng: number; lat: number }) => {
-    clearCurrentMarker();
-
-    const el = document.createElement("div");
-    el.className = "custom-marker";
-    el.innerHTML = `
-      <div class="bg-white rounded-lg shadow-lg p-2 border border-gray-200">
-        <div class="w-4 h-4 bg-red-500 rounded-full mx-auto mb-1"></div>
-        <p class="text-xs text-gray-600 text-center">Selected Location</p>
-      </div>
-    `;
-
-    const newMarker = new mapboxgl.Marker({
-      element: el,
-      anchor: "bottom",
-    })
-      .setLngLat([lngLat.lng, lngLat.lat])
-      .addTo(mapRef.current!);
-
-    activeMarkerRef.current = newMarker;
-    setSelectedLocation({ lng: lngLat.lng, lat: lngLat.lat });
-  };
-
   useEffect(() => {
     if (mapRef.current || !mapContainerRef.current) return;
 
@@ -89,15 +95,14 @@ export default function MapBox() {
     try {
       mapRef.current = new mapboxgl.Map({
         container: mapContainerRef.current,
-        style: "mapbox://styles/mapbox/streets-v12",
+        style: "mapbox://styles/mapbox/outdoors-v12",
         center: [-79.9178, 43.263],
-        zoom: 9,
+        zoom: 15,
       });
 
+      // Add click handler after map loads
       mapRef.current.on("load", () => {
-        mapRef.current?.on("click", (e) => {
-          createNewMarker(e.lngLat);
-        });
+        mapRef.current?.on("click", handleMapClick);
       });
 
       // Initial fetch of memories
@@ -163,7 +168,7 @@ export default function MapBox() {
       <div ref={mapContainerRef} className="h-full w-full" />
 
       {selectedLocation && (
-        <div className="absolute top-0 right-0 w-80">
+        <div className="absolute top-4 right-4 w-80">
           <ReportForm
             location={selectedLocation}
             onClose={clearCurrentMarker}
