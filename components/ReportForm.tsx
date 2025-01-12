@@ -53,7 +53,6 @@ export function ReportForm({
 
   const [selectedTags, setSelectedTags] = React.useState<string[]>([]);
   const [selectedImage, setSelectedImage] = React.useState<string | null>(null);
-  // const [isCameraOpen, setIsCameraOpen] = React.useState(false);
   const [cameraImage] = React.useState<string | null>(null);
 
   // const webcamRef = React.useRef<Webcam>(null);
