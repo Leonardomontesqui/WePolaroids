@@ -5,7 +5,6 @@ import {
   Card,
   CardTitle,
   CardHeader,
-  CardDescription,
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
@@ -18,8 +17,8 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
 import { reportFormAction } from "@/lib/actions";
-import { Check, Upload, X, Camera } from "lucide-react";
-import Webcam from "react-webcam";
+import { Check, Upload, X } from "lucide-react";
+// import Webcam from "react-webcam";
 
 interface MarkerPosition {
   lng: number;
@@ -54,10 +53,10 @@ export function ReportForm({
 
   const [selectedTags, setSelectedTags] = React.useState<string[]>([]);
   const [selectedImage, setSelectedImage] = React.useState<string | null>(null);
-  const [isCameraOpen, setIsCameraOpen] = React.useState(false);
-  const [cameraImage, setCameraImage] = React.useState<string | null>(null);
+  // const [isCameraOpen, setIsCameraOpen] = React.useState(false);
+  const [cameraImage] = React.useState<string | null>(null);
 
-  const webcamRef = React.useRef<Webcam>(null);
+  // const webcamRef = React.useRef<Webcam>(null);
 
   const toggleTag = (tagId: string) => {
     setSelectedTags((prev) =>
@@ -74,17 +73,18 @@ export function ReportForm({
     }
   };
 
-  const handleCameraToggle = () => {
-    setIsCameraOpen((prev) => !prev);
-  };
+  // const handleCameraToggle = () => {
+  //   setIsCameraOpen((prev) => !prev);
+  // };
 
-  const captureImage = () => {
-    if (webcamRef.current) {
-      const imageSrc = webcamRef.current.getScreenshot();
-      setCameraImage(imageSrc || null);
-      setIsCameraOpen(false);
-    }
-  };
+  // const captureImage = () => {
+  //   if (webcamRef.current) {
+  //     const imageSrc = webcamRef.current.getScreenshot();
+  //     console.log("Captured image:", imageSrc);
+  //     setCameraImage(imageSrc || null);
+  //     setIsCameraOpen(false);
+  //   }
+  // };
 
   return (
     <Card className={cn("w-full max-w-md bg-cream text-semiBlack", className)}>
@@ -106,6 +106,12 @@ export function ReportForm({
       </CardHeader>
       <form action={formAction}>
         <CardContent className="flex flex-col gap-4">
+          <input
+            type="hidden"
+            id="location"
+            name="location"
+            defaultValue={[location.lng, location.lat].join(", ")}
+          />
           {state.success ? (
             <p className="text-green-400 flex items-center gap-2 text-sm">
               <Check className="size-4" />
@@ -139,33 +145,6 @@ export function ReportForm({
               </p>
             )}
           </div>
-          {/* <div className="space-y-1">
-            <Label
-              htmlFor="location"
-              className={cn(state.errors?.location && "text-red-400")}
-            >
-              Location <span aria-hidden="true">*</span>
-            </Label>
-            <Input
-              id="location"
-              name="location"
-              placeholder="123 Main St, City, State"
-              className={cn(
-                "bg-white border-gray-700 text-semiBlack placeholder-gray-500",
-                state.errors?.location &&
-                  "border-red-400 focus-visible:ring-red-400"
-              )}
-              disabled={pending}
-              aria-invalid={!!state.errors?.location}
-              aria-errormessage="error-location"
-              defaultValue={state.defaultValues.location as string}
-            />
-            {state.errors?.location && (
-              <p id="error-location" className="text-red-400 text-sm">
-                {state.errors.location}
-              </p>
-            )}
-          </div> */}
           <div className="space-y-1">
             <Label className={cn(state.errors?.tags && "text-red-400")}>
               Tags <span aria-hidden="true">*</span>
@@ -277,7 +256,7 @@ export function ReportForm({
             >
               <Camera className="mr-2" /> Open Camera
             </Button> */}
-            {isCameraOpen && (
+            {/* {isCameraOpen && (
               <div className="relative mt-4 rounded-lg bg-gray-800 p-2">
                 <Webcam
                   audio={false}
@@ -298,7 +277,7 @@ export function ReportForm({
                   Capture Image
                 </Button>
               </div>
-            )}
+            )} */}
             {state.errors?.image && (
               <p id="error-image" className="text-red-400 text-sm">
                 {state.errors.image}

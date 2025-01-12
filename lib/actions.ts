@@ -8,6 +8,7 @@ export async function reportFormAction(
   _prevState: unknown,
   formData: FormData
 ) {
+  console.log("Form data image", formData.get("image"));
   console.log("Action started");
 
   const defaultValues = Object.fromEntries(formData.entries());

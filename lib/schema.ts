@@ -15,11 +15,11 @@ export const reportFormSchema = z.object({
     .max(5, { message: "Maximum 5 tags can be selected" }),
   description: z
     .string()
-    .min(10, { message: "Description must be at least 10 characters" })
+    .min(5, { message: "Description must be at least 5 characters" })
     .max(1000, { message: "Description must be at most 1000 characters" }),
   image: z
     .instanceof(File)
-    .refine((file) => file.size <= 5000000, "File size must be less than 5MB")
+    .refine((file) => file.size <= 1000000, "File size must be less than 1MB")
     .refine(
       (file) => ["image/jpeg", "image/png", "image/webp"].includes(file.type),
       "Only .jpg, .png, and .webp formats are supported"

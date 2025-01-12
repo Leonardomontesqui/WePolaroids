@@ -12,7 +12,7 @@ const supabase = createSupabaseClient();
 export const uploadImage = async (file: File) => {
   try {
     const fileName = `${Date.now()}-${file.name}`;
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from("image_uploads") // Make sure this bucket exists in your Supabase
       .upload(fileName, file, {
         cacheControl: "3600",

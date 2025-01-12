@@ -3,8 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { ReportForm } from "./ReportForm";
-import { createClient } from "@supabase/supabase-js";
-import Image from "next/image";
+import { createSupabaseClient } from "@/lib/supabase/client";
 
 interface MarkerPosition {
   lng: number;
@@ -24,13 +23,11 @@ export default function MapBox() {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<{ [key: string]: mapboxgl.Marker }>({});
   const activeMarkerRef = useRef<mapboxgl.Marker | null>(null);
-  const [selectedLocation, setSelectedLocation] = useState<MarkerPosition | null>(null);
+  const [selectedLocation, setSelectedLocation] =
+    useState<MarkerPosition | null>(null);
   const [memories, setMemories] = useState<Memory[]>([]);
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = createSupabaseClient();
 
   const clearCurrentMarker = () => {
     if (activeMarkerRef.current) {
@@ -67,6 +64,7 @@ export default function MapBox() {
     // Update refs and state
     activeMarkerRef.current = newMarker;
     setSelectedLocation({ lng: lngLat.lng, lat: lngLat.lat });
+    console.log("Selected location:", lngLat);
   };
 
   const createCustomMarker = (memory: Memory) => {
@@ -74,17 +72,18 @@ export default function MapBox() {
     el.className = "memory-marker";
     el.innerHTML = `
       <div class="marker-container">
-        <div class="bg-white flex flex-col items-center rounded-lg shadow-lg p-2 border border-gray-200 w-24 hover:shadow-xl transition-all duration-300">
+        <div class="bg-white flex flex-col justify-center items-center rounded-lg shadow-lg p-2 border border-gray-200 w-[90px] h-[120px] hover:shadow-xl transition-all duration-300 my-auto">
           <img src="${memory.image_url}" 
                alt="${memory.title}"
                class="w-20 h-20 object-cover rounded-lg mb-1" />
-          <p class="text-xs text-gray-600 text-center font-semibold w-fit">${memory.title}</p>
         </div>
         
         <!-- Hover Card -->
         <div class="hover-card opacity-0 invisible pointer-events-none absolute left-1/2 bottom-full mb-2 w-64 bg-white rounded-lg shadow-xl p-4 transform -translate-x-1/2 transition-all duration-300">
           <h3 class="text-lg font-semibold mb-2">${memory.title}</h3>
-          <p class="text-sm text-gray-600 mb-2">${memory.description || 'No description available'}</p>
+          <p class="text-sm text-gray-600 mb-2">${
+            memory.description || "No description available"
+          }</p>
           <div class="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-1/2">
             <div class="w-4 h-4 bg-white transform rotate-45 border-r border-b border-gray-200"></div>
           </div>
@@ -93,19 +92,19 @@ export default function MapBox() {
     `;
 
     // Add hover event listeners
-    const container = el.querySelector('.marker-container');
-    const hoverCard = el.querySelector('.hover-card');
-    
-    container?.addEventListener('mouseenter', () => {
-      hoverCard?.classList.remove('opacity-0', 'invisible');
-      hoverCard?.classList.add('opacity-100', 'visible');
-      el.style.zIndex = '1000';
+    const container = el.querySelector(".marker-container");
+    const hoverCard = el.querySelector(".hover-card");
+
+    container?.addEventListener("mouseenter", () => {
+      hoverCard?.classList.remove("opacity-0", "invisible");
+      hoverCard?.classList.add("opacity-100", "visible");
+      el.style.zIndex = "1000";
     });
 
-    container?.addEventListener('mouseleave', () => {
-      hoverCard?.classList.add('opacity-0', 'invisible');
-      hoverCard?.classList.remove('opacity-100', 'visible');
-      el.style.zIndex = 'auto';
+    container?.addEventListener("mouseleave", () => {
+      hoverCard?.classList.add("opacity-0", "invisible");
+      hoverCard?.classList.remove("opacity-100", "visible");
+      el.style.zIndex = "auto";
     });
 
     return new mapboxgl.Marker({
@@ -222,7 +221,8 @@ export default function MapBox() {
         .hover-card {
           z-index: 1000;
           pointer-events: none;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+            0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
         .marker-container:hover .hover-card {
           pointer-events: auto;
