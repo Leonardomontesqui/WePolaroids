@@ -1,5 +1,12 @@
 import type { Metadata } from "next";
 import { UserProvider } from '@auth0/nextjs-auth0/client';
+import {
+  ClerkProvider,
+  SignInButton,
+  SignedIn,
+  SignedOut,
+  UserButton
+} from '@clerk/nextjs'
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -24,14 +31,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+
     <html lang="en">
-      <UserProvider>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
       </body>
-      </UserProvider>
     </html>
   );
 }

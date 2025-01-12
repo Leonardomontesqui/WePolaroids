@@ -16,6 +16,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import {
+  ClerkProvider,
+  SignInButton,
+  SignedIn,
+  SignedOut,
+  UserButton
+} from '@clerk/nextjs'
 
 import { reportFormAction } from "@/lib/actions";
 import { Check, Upload, X, Camera } from "lucide-react";
@@ -86,9 +93,31 @@ export function ReportForm({
   const captureImage = () => {
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
-      setCameraImage(imageSrc || null);
-      setIsCameraOpen(false);
+      if (imageSrc) {
+        const imageBlob = dataURItoBlob(imageSrc);
+        console.log(imageBlob);
+  
+        // Now you can pass the imageBlob wherever it's needed, such as uploading it
+        setCameraImage(URL.createObjectURL(imageBlob));
+  
+        setIsCameraOpen(false);
+      }
     }
+  };
+  
+
+  const dataURItoBlob = (dataURI: string) => {
+    const byteString = atob(dataURI.split(',')[1]);
+    const arrayBuffer = new ArrayBuffer(byteString.length);
+    const uintArray = new Uint8Array(arrayBuffer);
+    
+    for (let i = 0; i < byteString.length; i++) {
+      uintArray[i] = byteString.charCodeAt(i);
+    }
+  
+    // Ensure the MIME type matches the file extension
+    const mimeType = dataURI.split(';')[0].split(':')[1]; // Extract MIME type from base64 string
+    return new Blob([arrayBuffer], { type: mimeType }); 
   };
 
   return (
@@ -318,6 +347,15 @@ export function ReportForm({
           
         </CardContent>
         <CardFooter>
+          <ClerkProvider>
+          <SignedOut>
+          <SignInButton>
+  <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2">
+    Sign In
+  </button>
+</SignInButton>
+          </SignedOut>
+          <SignedIn>
           <Button
             type="submit"
             disabled={pending}
@@ -325,8 +363,12 @@ export function ReportForm({
           >
             {pending ? "Submitting..." : "Submit Report"}
           </Button>
+          <UserButton />
+          </SignedIn>
+          </ClerkProvider>
         </CardFooter>
       </form>
     </Card>
   );
 }
+
