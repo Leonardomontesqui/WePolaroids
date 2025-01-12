@@ -18,7 +18,8 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
 import { reportFormAction } from "@/lib/actions";
-import { Check, Upload, X } from "lucide-react";
+import { Check, Upload, X, Camera } from "lucide-react";
+import Webcam from "react-webcam";
 
 interface MarkerPosition {
   lng: number;
@@ -58,6 +59,10 @@ export function ReportForm({
 
   const [selectedTags, setSelectedTags] = React.useState<string[]>([]);
   const [selectedImage, setSelectedImage] = React.useState<string | null>(null);
+  const [isCameraOpen, setIsCameraOpen] = React.useState(false);
+  const [cameraImage, setCameraImage] = React.useState<string | null>(null);
+
+  const webcamRef = React.useRef<Webcam>(null);
 
   const toggleTag = (tagId: string) => {
     setSelectedTags((prev) =>
@@ -71,6 +76,18 @@ export function ReportForm({
     const file = event.target.files?.[0];
     if (file) {
       setSelectedImage(URL.createObjectURL(file));
+    }
+  };
+
+  const handleCameraToggle = () => {
+    setIsCameraOpen((prev) => !prev);
+  };
+
+  const captureImage = () => {
+    if (webcamRef.current) {
+      const imageSrc = webcamRef.current.getScreenshot();
+      setCameraImage(imageSrc || null);
+      setIsCameraOpen(false);
     }
   };
 
@@ -233,9 +250,9 @@ export function ReportForm({
                 htmlFor="image"
                 className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-700 border-dashed rounded-lg cursor-pointer bg-gray-800 hover:bg-gray-700"
               >
-                {selectedImage ? (
+                {selectedImage || cameraImage ? (
                   <img
-                    src={selectedImage}
+                  src={selectedImage || cameraImage || ""}
                     alt="Selected"
                     className="w-full h-full object-cover rounded-lg"
                   />
@@ -262,12 +279,43 @@ export function ReportForm({
                 />
               </label>
             </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="mt-4 border-gray-700 text-black hover:bg-gray-700"
+              onClick={handleCameraToggle}
+            >
+              <Camera className="mr-2" /> Open Camera
+            </Button>
+            {isCameraOpen && (
+              <div className="relative mt-4 rounded-lg bg-gray-800 p-2">
+                <Webcam
+                  audio={false}
+                  ref={webcamRef}
+                  screenshotFormat="image/png"
+                  width="100%"
+                  height="auto"
+                  videoConstraints={{
+                    facingMode: "environment",
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="absolute bottom-2 left-1/2 transform -translate-x-1/2 text-gray-100 bg-gray-700 border-gray-600 hover:bg-gray-600"
+                  onClick={captureImage}
+                >
+                  Capture Image
+                </Button>
+              </div>
+            )}
             {state.errors?.image && (
               <p id="error-image" className="text-red-400 text-sm">
                 {state.errors.image}
               </p>
             )}
           </div>
+          
         </CardContent>
         <CardFooter>
           <Button
