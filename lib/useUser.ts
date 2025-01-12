@@ -48,3 +48,12 @@ export const createPost = async (postData: Data_Post) => {
   }
   return;
 };
+
+export const fetchPosts = async () => {
+  const { data, error } = await supabase.from("memories2").select();
+  if (error) {
+    console.error("Error fetching posts:", error.message);
+    return null;
+  }
+  return data;
+};
