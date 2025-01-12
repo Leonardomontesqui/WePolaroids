@@ -13,18 +13,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 import { reportFormAction } from "@/lib/actions";
 import { Check, Upload, X } from "lucide-react";
+
+interface MarkerPosition {
+  lng: number;
+  lat: number;
+}
 
 const tags = [
   { id: "pothole", label: "Pothole" },
@@ -37,10 +36,18 @@ const tags = [
   { id: "noise", label: "Noise" },
 ];
 
-export function ReportForm({ className }: React.ComponentProps<typeof Card>) {
+export function ReportForm({
+  className,
+  location,
+  onClose,
+}: React.ComponentProps<typeof Card> & {
+  onClose?: () => void;
+  location: MarkerPosition;
+}) {
   const [state, formAction, pending] = React.useActionState(reportFormAction, {
     defaultValues: {
-      location: "",
+      title: "",
+      location: [location.lng, location.lat].join(", "),
       tags: [],
       description: "",
       image: null,
@@ -49,8 +56,16 @@ export function ReportForm({ className }: React.ComponentProps<typeof Card>) {
     errors: null,
   });
 
-  const [selectedImage, setSelectedImage] = React.useState<string | null>(null);
   const [selectedTags, setSelectedTags] = React.useState<string[]>([]);
+  const [selectedImage, setSelectedImage] = React.useState<string | null>(null);
+
+  const toggleTag = (tagId: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tagId)
+        ? prev.filter((id) => id !== tagId)
+        : [...prev, tagId]
+    );
+  };
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -59,45 +74,68 @@ export function ReportForm({ className }: React.ComponentProps<typeof Card>) {
     }
   };
 
-  const handleTagSelect = (tagId: string) => {
-    setSelectedTags((prev) => {
-      if (prev.includes(tagId)) {
-        return prev.filter((id) => id !== tagId);
-      } else {
-        return [...prev, tagId];
-      }
-    });
-  };
-
-  const removeTag = (tagId: string) => {
-    setSelectedTags((prev) => prev.filter((id) => id !== tagId));
-  };
-
   return (
     <Card
       className={cn("w-full max-w-md bg-gray-900 text-gray-100", className)}
     >
       <CardHeader>
-        <CardTitle className="text-gray-100">Report an Issue</CardTitle>
-        <CardDescription className="text-gray-400">
-          Help us improve your community by reporting issues you encounter.
-        </CardDescription>
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle className="text-gray-100">Share something</CardTitle>
+            {/* <CardDescription className="text-gray-400">
+              Share a cool moment
+            </CardDescription> */}
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-gray-400 hover:text-gray-100"
+            aria-label="Close form"
+            onClick={onClose}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
       </CardHeader>
       <form action={formAction}>
-        <CardContent className="flex flex-col gap-6">
+        <CardContent className="flex flex-col gap-4">
           {state.success ? (
             <p className="text-green-400 flex items-center gap-2 text-sm">
               <Check className="size-4" />
               Your report has been submitted. Thank you for your contribution.
             </p>
           ) : null}
-          <div
-            className="group/field grid gap-2"
-            data-invalid={!!state.errors?.location}
-          >
+          <div className="space-y-1">
+            <Label
+              htmlFor="title"
+              className={cn(state.errors?.title && "text-red-400")}
+            >
+              Title <span aria-hidden="true">*</span>
+            </Label>
+            <Input
+              id="title"
+              name="title"
+              placeholder="Brief title of the issue"
+              className={cn(
+                "bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-500",
+                state.errors?.title &&
+                  "border-red-400 focus-visible:ring-red-400"
+              )}
+              disabled={pending}
+              aria-invalid={!!state.errors?.title}
+              aria-errormessage="error-title"
+              defaultValue={state.defaultValues.title as string}
+            />
+            {state.errors?.title && (
+              <p id="error-title" className="text-red-400 text-sm">
+                {state.errors.title}
+              </p>
+            )}
+          </div>
+          <div className="space-y-1">
             <Label
               htmlFor="location"
-              className="group-data-[invalid=true]/field:text-red-400"
+              className={cn(state.errors?.location && "text-red-400")}
             >
               Location <span aria-hidden="true">*</span>
             </Label>
@@ -105,15 +143,15 @@ export function ReportForm({ className }: React.ComponentProps<typeof Card>) {
               id="location"
               name="location"
               placeholder="123 Main St, City, State"
-              className="bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-500 group-data-[invalid=true]/field:border-red-400 focus-visible:ring-gray-500"
+              className={cn(
+                "bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-500",
+                state.errors?.location &&
+                  "border-red-400 focus-visible:ring-red-400"
+              )}
               disabled={pending}
               aria-invalid={!!state.errors?.location}
               aria-errormessage="error-location"
-              defaultValue={
-                typeof state.defaultValues.location === "string"
-                  ? state.defaultValues.location
-                  : ""
-              }
+              defaultValue={state.defaultValues.location as string}
             />
             {state.errors?.location && (
               <p id="error-location" className="text-red-400 text-sm">
@@ -121,62 +159,45 @@ export function ReportForm({ className }: React.ComponentProps<typeof Card>) {
               </p>
             )}
           </div>
-          <div
-            className="group/field grid gap-2"
-            data-invalid={!!state.errors?.tags}
-          >
-            <Label className="group-data-[invalid=true]/field:text-red-400">
+          <div className="space-y-1">
+            <Label className={cn(state.errors?.tags && "text-red-400")}>
               Tags <span aria-hidden="true">*</span>
             </Label>
-            <Select onValueChange={handleTagSelect}>
-              <SelectTrigger className="w-full bg-gray-800 border-gray-700 text-gray-100">
-                <SelectValue placeholder="Select tags" />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-700">
+            <ScrollArea className="w-full whitespace-nowrap rounded-md border border-gray-700">
+              <div className="flex w-max space-x-2 p-2">
                 {tags.map((tag) => (
-                  <SelectItem
+                  <Badge
                     key={tag.id}
-                    value={tag.id}
-                    className="text-gray-100"
+                    variant={
+                      selectedTags.includes(tag.id) ? "default" : "outline"
+                    }
+                    className={cn(
+                      "cursor-pointer",
+                      selectedTags.includes(tag.id)
+                        ? "bg-blue-600 hover:bg-blue-700"
+                        : "bg-gray-800 hover:bg-gray-700"
+                    )}
+                    onClick={() => toggleTag(tag.id)}
                   >
                     {tag.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <ScrollArea className="h-24 w-full rounded-md border border-gray-700 p-2">
-              <div className="flex flex-wrap gap-2">
-                {selectedTags.map((tagId) => (
-                  <div
-                    key={tagId}
-                    className="bg-gray-700 text-gray-100 px-3 py-1 rounded-full text-sm flex items-center gap-2"
-                  >
-                    {tags.find((t) => t.id === tagId)?.label}
-                    <button
-                      type="button"
-                      onClick={() => removeTag(tagId)}
-                      className="text-gray-400 hover:text-gray-200"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                    <input type="hidden" name="tags" value={tagId} />
-                  </div>
+                  </Badge>
                 ))}
               </div>
+              <ScrollBar orientation="horizontal" />
             </ScrollArea>
+            {selectedTags.map((tagId) => (
+              <input key={tagId} type="hidden" name="tags" value={tagId} />
+            ))}
             {state.errors?.tags && (
               <p id="error-tags" className="text-red-400 text-sm">
                 {state.errors.tags}
               </p>
             )}
           </div>
-          <div
-            className="group/field grid gap-2"
-            data-invalid={!!state.errors?.description}
-          >
+          <div className="space-y-1">
             <Label
               htmlFor="description"
-              className="group-data-[invalid=true]/field:text-red-400"
+              className={cn(state.errors?.description && "text-red-400")}
             >
               Description <span aria-hidden="true">*</span>
             </Label>
@@ -184,15 +205,15 @@ export function ReportForm({ className }: React.ComponentProps<typeof Card>) {
               id="description"
               name="description"
               placeholder="Describe the issue you're reporting..."
-              className="bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-500 group-data-[invalid=true]/field:border-red-400 focus-visible:ring-gray-500"
+              className={cn(
+                "bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-500",
+                state.errors?.description &&
+                  "border-red-400 focus-visible:ring-red-400"
+              )}
               disabled={pending}
               aria-invalid={!!state.errors?.description}
               aria-errormessage="error-description"
-              defaultValue={
-                typeof state.defaultValues.description === "string"
-                  ? state.defaultValues.description
-                  : ""
-              }
+              defaultValue={state.defaultValues.description as string}
             />
             {state.errors?.description && (
               <p id="error-description" className="text-red-400 text-sm">
@@ -200,13 +221,10 @@ export function ReportForm({ className }: React.ComponentProps<typeof Card>) {
               </p>
             )}
           </div>
-          <div
-            className="group/field grid gap-2"
-            data-invalid={!!state.errors?.image}
-          >
+          <div className="space-y-1">
             <Label
               htmlFor="image"
-              className="group-data-[invalid=true]/field:text-red-400"
+              className={cn(state.errors?.image && "text-red-400")}
             >
               Image <span aria-hidden="true">*</span>
             </Label>
@@ -254,9 +272,8 @@ export function ReportForm({ className }: React.ComponentProps<typeof Card>) {
         <CardFooter>
           <Button
             type="submit"
-            size="sm"
             disabled={pending}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
           >
             {pending ? "Submitting..." : "Submit Report"}
           </Button>

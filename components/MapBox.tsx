@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { ReportForm } from "./ReportForm";
 
 interface MarkerPosition {
   lng: number;
@@ -11,7 +12,44 @@ interface MarkerPosition {
 export default function MapBox() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
-  const [markers, setMarkers] = useState<mapboxgl.Marker[]>([]);
+  const activeMarkerRef = useRef<mapboxgl.Marker | null>(null);
+  const [selectedLocation, setSelectedLocation] =
+    useState<MarkerPosition | null>(null);
+
+  const clearCurrentMarker = () => {
+    if (activeMarkerRef.current) {
+      activeMarkerRef.current.remove();
+      activeMarkerRef.current = null;
+    }
+    setSelectedLocation(null);
+  };
+
+  const createNewMarker = (lngLat: { lng: number; lat: number }) => {
+    // Clear any existing marker first
+    clearCurrentMarker();
+
+    // Create custom marker element
+    const el = document.createElement("div");
+    el.className = "custom-marker";
+    el.innerHTML = `
+      <div class="bg-white rounded-lg shadow-lg p-2 border border-gray-200">
+        <div class="w-4 h-4 bg-red-500 rounded-full mx-auto mb-1"></div>
+        <p class="text-xs text-gray-600 text-center">Selected Location</p>
+      </div>
+    `;
+
+    // Create and add new marker
+    const newMarker = new mapboxgl.Marker({
+      element: el,
+      anchor: "bottom",
+    })
+      .setLngLat([lngLat.lng, lngLat.lat])
+      .addTo(mapRef.current!);
+
+    // Update refs and state
+    activeMarkerRef.current = newMarker;
+    setSelectedLocation({ lng: lngLat.lng, lat: lngLat.lat });
+  };
 
   useEffect(() => {
     if (mapRef.current || !mapContainerRef.current) return;
@@ -29,42 +67,39 @@ export default function MapBox() {
       // Add click event listener after map loads
       mapRef.current.on("load", () => {
         mapRef.current?.on("click", (e) => {
-          const { lng, lat } = e.lngLat;
-
-          // Create a new marker
-          const marker = new mapboxgl.Marker()
-            .setLngLat([lng, lat])
-            .addTo(mapRef.current!);
-
-          // Add popup with coordinates (optional)
-          new mapboxgl.Popup()
-            .setLngLat([lng, lat])
-            .setHTML(
-              `<p>Longitude: ${lng.toFixed(4)}<br>Latitude: ${lat.toFixed(
-                4
-              )}</p>`
-            )
-            .addTo(mapRef.current!);
-
-          // Store marker reference for cleanup
-          setMarkers((prevMarkers) => [...prevMarkers, marker]);
-
-          console.log({
-            lng: lng.toFixed(4),
-            lat: lat.toFixed(4),
-          });
+          createNewMarker(e.lngLat);
         });
       });
 
-      // Clean up map and markers on unmount
+      // Clean up on unmount
       return () => {
-        markers.forEach((marker) => marker.remove());
+        clearCurrentMarker();
         mapRef.current?.remove();
       };
     } catch (error) {
       console.error("Error initializing map:", error);
     }
-  }, []); // Dependencies array remains empty as we want this to run once
+  }, []);
 
-  return <div ref={mapContainerRef} className="h-screen w-full" />;
+  return (
+    <div className="relative h-screen w-full">
+      <div ref={mapContainerRef} className="h-full w-full" />
+
+      {/* Report Form */}
+      {selectedLocation && (
+        <div className="absolute top-0 right-0 w-80">
+          <ReportForm
+            location={selectedLocation}
+            onClose={clearCurrentMarker}
+          />
+        </div>
+      )}
+
+      <style jsx global>{`
+        .custom-marker {
+          transform: translate(-50%, -100%);
+        }
+      `}</style>
+    </div>
+  );
 }
