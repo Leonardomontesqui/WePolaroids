@@ -68,8 +68,7 @@ export function ReportForm({
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setSelectedImage("");
-      // URL.createObjectURL(file);
+      setSelectedImage(URL.createObjectURL(file));
     }
   };
 
