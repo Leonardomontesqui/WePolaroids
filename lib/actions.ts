@@ -2,6 +2,8 @@
 
 import { reportFormSchema } from "@/lib/schema";
 import { z } from "zod";
+import { uploadImage } from "./useUser";
+import { createPost } from "./useUser";
 
 export async function reportFormAction(
   _prevState: unknown,
@@ -15,7 +17,15 @@ export async function reportFormAction(
       tags: formData.getAll("tags"),
       image: formData.get("image") as File,
     });
-
+    console.log("hi");
+    const uploadedImageUrl = await uploadImage(data.image);
+    await createPost({
+      title: data.title,
+      tags: data.tags,
+      description: data.description,
+      image: uploadedImageUrl ? uploadedImageUrl : "",
+      location: data.location.split(",").map(Number) as [number, number],
+    });
     // This simulates a slow response like a form submission.
     // Replace this with your actual form submission logic.
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -25,6 +35,7 @@ export async function reportFormAction(
     return {
       defaultValues: {
         location: "",
+        title: "",
         tags: [],
         description: "",
         image: null,
@@ -34,6 +45,7 @@ export async function reportFormAction(
     };
   } catch (error) {
     if (error instanceof z.ZodError) {
+      console.log(error.flatten().fieldErrors);
       return {
         defaultValues,
         success: false,

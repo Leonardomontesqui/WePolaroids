@@ -5,6 +5,10 @@ export const reportFormSchema = z.object({
     .string()
     .min(2, { message: "Location must be at least 2 characters" })
     .max(100, { message: "Location must be at most 100 characters" }),
+  title: z
+    .string()
+    .min(5, { message: "Title must be at least 5 characters" })
+    .max(100, { message: "Title must be at most 100 characters" }),
   tags: z
     .array(z.string())
     .min(1, { message: "At least one tag must be selected" })
