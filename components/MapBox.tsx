@@ -2,78 +2,114 @@
 import React, { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { createClient } from "@supabase/supabase-js";
 import { ReportForm } from "./ReportForm";
 
+// Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
 interface MarkerPosition {
-  lng: number;
+  lit: number;
   lat: number;
 }
 
 export default function MapBox() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
-  const activeMarkerRef = useRef<mapboxgl.Marker | null>(null);
-  const [selectedLocation, setSelectedLocation] =
-    useState<MarkerPosition | null>(null);
+  const [markers, setMarkers] = useState<mapboxgl.Marker[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<MarkerPosition | null>(null);
+  const [showForm, setShowForm] = useState(false);
 
-  const clearCurrentMarker = () => {
-    if (activeMarkerRef.current) {
-      activeMarkerRef.current.remove();
-      activeMarkerRef.current = null;
+  // Save marker to Supabase
+  const saveMarker = async (
+    lit: number,
+    lat: number,
+    title: string,
+    description: string,
+    image_url: string,
+    type: string
+  ) => {
+    try {
+      const { error } = await supabase.from("memories3").insert([
+        {
+          title,
+          description,
+          image_url,
+          lit, // separate lit and lat
+          lat,
+          type,
+        },
+      ]);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error("Error saving marker to Supabase:", error);
     }
-    setSelectedLocation(null);
   };
 
-  const createNewMarker = (lngLat: { lng: number; lat: number }) => {
-    // Clear any existing marker first
-    clearCurrentMarker();
+  // Load markers from Supabase
+  const loadMarkers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("memories3") // Updated to memories3
+        .select("title, description, image_url, lit, lat, type");
 
-    // Create custom marker element
-    const el = document.createElement("div");
-    el.className = "custom-marker";
-    el.innerHTML = `
-      <div class="bg-white rounded-lg shadow-lg p-2 border border-gray-200">
-        <div class="w-4 h-4 bg-red-500 rounded-full mx-auto mb-1"></div>
-        <p class="text-xs text-gray-600 text-center">Selected Location</p>
-      </div>
-    `;
+      if (error) throw error;
 
-    // Create and add new marker
-    const newMarker = new mapboxgl.Marker({
-      element: el,
-      anchor: "bottom",
-    })
-      .setLngLat([lngLat.lng, lngLat.lat])
-      .addTo(mapRef.current!);
+      if (data && mapRef.current) {
+        const newMarkers = data.map((markerData) => {
+          const { lit, lat } = markerData;
 
-    // Update refs and state
-    activeMarkerRef.current = newMarker;
-    setSelectedLocation({ lng: lngLat.lng, lat: lngLat.lat });
+          const el = document.createElement("div");
+          el.className = "custom-marker";
+          el.innerHTML = `
+            <div class="relative w-10 h-10 bg-black rounded-full flex justify-center items-center">
+              <img src="${markerData.image_url}" alt="${markerData.title}" class="w-6 h-6 rounded-full object-cover" />
+            </div>
+          `;
+
+          return new mapboxgl.Marker({ element: el, anchor: "bottom" })
+            .setLngLat([lit, lat])
+            .addTo(mapRef.current!);
+        });
+
+        setMarkers(newMarkers);
+      }
+    } catch (error) {
+      console.error("Error loading markers from Supabase:", error);
+    }
   };
 
   useEffect(() => {
+    console.log(mapContainerRef.current);
     if (mapRef.current || !mapContainerRef.current) return;
 
-    mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+    mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
     try {
       mapRef.current = new mapboxgl.Map({
         container: mapContainerRef.current,
         style: "mapbox://styles/mapbox/streets-v12",
-        center: [-79, 44],
-        zoom: 9,
+        center: [-79.9178, 43.263],
+        zoom: 15.2,
       });
 
-      // Add click event listener after map loads
       mapRef.current.on("load", () => {
+        loadMarkers();
+
         mapRef.current?.on("click", (e) => {
-          createNewMarker(e.lngLat);
+          const { lng: lit, lat } = e.lngLat;
+
+          setSelectedLocation({ lit, lat });
+          setShowForm(true);
         });
       });
 
-      // Clean up on unmount
       return () => {
-        clearCurrentMarker();
+        markers.forEach((marker) => marker.remove());
         mapRef.current?.remove();
       };
     } catch (error) {
@@ -85,12 +121,28 @@ export default function MapBox() {
     <div className="relative h-screen w-full">
       <div ref={mapContainerRef} className="h-full w-full" />
 
-      {/* Report Form */}
-      {selectedLocation && (
-        <div className="absolute top-0 right-0 w-80">
+      {showForm && selectedLocation && (
+        <div className="absolute top-4 right-4 w-80">
           <ReportForm
             location={selectedLocation}
-            onClose={clearCurrentMarker}
+            onSave={async ({ title, description, image_url, type }) => {
+              if (selectedLocation) {
+                await saveMarker(
+                  selectedLocation.lit,
+                  selectedLocation.lat,
+                  title,
+                  description,
+                  image_url,
+                  type // Include 'type' field
+                );
+              }
+              setShowForm(false);
+              setSelectedLocation(null);
+            }}
+            onClose={() => {
+              setShowForm(false);
+              setSelectedLocation(null);
+            }}
           />
         </div>
       )}

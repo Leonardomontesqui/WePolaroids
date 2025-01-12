@@ -1,284 +1,102 @@
-"use client";
+import React, { useState } from "react";
 
-import * as React from "react";
-import {
-  Card,
-  CardTitle,
-  CardHeader,
-  CardDescription,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
-
-import { reportFormAction } from "@/lib/actions";
-import { Check, Upload, X } from "lucide-react";
-
-interface MarkerPosition {
-  lng: number;
-  lat: number;
+// Type for the form data
+interface ReportFormProps {
+  location: { lit: number; lat: number }; // Coordinates of the clicked location
+  onSave: (formData: { title: string; description: string; image_url: string; type: string }) => void; // Save function
+  onClose: () => void; // Close form function
 }
 
-const tags = [
-  { id: "pothole", label: "Pothole" },
-  { id: "park", label: "Park" },
-  { id: "streetlight", label: "Streetlight" },
-  { id: "graffiti", label: "Graffiti" },
-  { id: "trash", label: "Trash" },
-  { id: "sidewalk", label: "Sidewalk" },
-  { id: "traffic", label: "Traffic" },
-  { id: "noise", label: "Noise" },
-];
+export const ReportForm: React.FC<ReportFormProps> = ({ location, onSave, onClose }) => {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [type, setType] = useState("");
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
 
-export function ReportForm({
-  className,
-  location,
-  onClose,
-}: React.ComponentProps<typeof Card> & {
-  onClose?: () => void;
-  location: MarkerPosition;
-}) {
-  const [state, formAction, pending] = React.useActionState(reportFormAction, {
-    defaultValues: {
-      title: "",
-      location: [location.lng, location.lat].join(", "),
-      tags: [],
-      description: "",
-      image: null,
-    },
-    success: false,
-    errors: null,
-  });
-
-  const [selectedTags, setSelectedTags] = React.useState<string[]>([]);
-  const [selectedImage, setSelectedImage] = React.useState<string | null>(null);
-
-  const toggleTag = (tagId: string) => {
-    setSelectedTags((prev) =>
-      prev.includes(tagId)
-        ? prev.filter((id) => id !== tagId)
-        : [...prev, tagId]
-    );
-  };
-
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setSelectedImage(URL.createObjectURL(file));
-    }
+    // Save the form data by passing it to onSave function
+    onSave({
+      title,
+      description,
+      image_url: imageUrl,
+      type,
+    });
   };
 
   return (
-    <Card
-      className={cn("w-full max-w-md bg-gray-900 text-gray-100", className)}
-    >
-      <CardHeader>
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-gray-100">Share something</CardTitle>
-            {/* <CardDescription className="text-gray-400">
-              Share a cool moment
-            </CardDescription> */}
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-gray-400 hover:text-gray-100"
-            aria-label="Close form"
-            onClick={onClose}
-          >
-            <X className="h-4 w-4" />
-          </Button>
+    <div className="bg-white p-4 rounded-lg shadow-lg w-80">
+      <h2 className="text-xl font-bold mb-4">Report a Location</h2>
+
+      <form onSubmit={handleSubmit}>
+        <div className="mb-4">
+          <label htmlFor="title" className="block font-medium text-gray-700">Title</label>
+          <input
+            id="title"
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="mt-1 block w-full p-2 border rounded-md"
+            required
+          />
         </div>
-      </CardHeader>
-      <form action={formAction}>
-        <CardContent className="flex flex-col gap-4">
-          {state.success ? (
-            <p className="text-green-400 flex items-center gap-2 text-sm">
-              <Check className="size-4" />
-              Your report has been submitted. Thank you for your contribution.
-            </p>
-          ) : null}
-          <div className="space-y-1">
-            <Label
-              htmlFor="title"
-              className={cn(state.errors?.title && "text-red-400")}
-            >
-              Title <span aria-hidden="true">*</span>
-            </Label>
-            <Input
-              id="title"
-              name="title"
-              placeholder="Brief title of the issue"
-              className={cn(
-                "bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-500",
-                state.errors?.title &&
-                  "border-red-400 focus-visible:ring-red-400"
-              )}
-              disabled={pending}
-              aria-invalid={!!state.errors?.title}
-              aria-errormessage="error-title"
-              defaultValue={state.defaultValues.title as string}
-            />
-            {state.errors?.title && (
-              <p id="error-title" className="text-red-400 text-sm">
-                {state.errors.title}
-              </p>
-            )}
-          </div>
-          <div className="space-y-1">
-            <Label
-              htmlFor="location"
-              className={cn(state.errors?.location && "text-red-400")}
-            >
-              Location <span aria-hidden="true">*</span>
-            </Label>
-            <Input
-              id="location"
-              name="location"
-              placeholder="123 Main St, City, State"
-              className={cn(
-                "bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-500",
-                state.errors?.location &&
-                  "border-red-400 focus-visible:ring-red-400"
-              )}
-              disabled={pending}
-              aria-invalid={!!state.errors?.location}
-              aria-errormessage="error-location"
-              defaultValue={state.defaultValues.location as string}
-            />
-            {state.errors?.location && (
-              <p id="error-location" className="text-red-400 text-sm">
-                {state.errors.location}
-              </p>
-            )}
-          </div>
-          <div className="space-y-1">
-            <Label className={cn(state.errors?.tags && "text-red-400")}>
-              Tags <span aria-hidden="true">*</span>
-            </Label>
-            <ScrollArea className="w-full whitespace-nowrap rounded-md border border-gray-700">
-              <div className="flex w-max space-x-2 p-2">
-                {tags.map((tag) => (
-                  <Badge
-                    key={tag.id}
-                    variant={
-                      selectedTags.includes(tag.id) ? "default" : "outline"
-                    }
-                    className={cn(
-                      "cursor-pointer",
-                      selectedTags.includes(tag.id)
-                        ? "bg-blue-600 hover:bg-blue-700"
-                        : "bg-gray-800 hover:bg-gray-700"
-                    )}
-                    onClick={() => toggleTag(tag.id)}
-                  >
-                    {tag.label}
-                  </Badge>
-                ))}
-              </div>
-              <ScrollBar orientation="horizontal" />
-            </ScrollArea>
-            {selectedTags.map((tagId) => (
-              <input key={tagId} type="hidden" name="tags" value={tagId} />
-            ))}
-            {state.errors?.tags && (
-              <p id="error-tags" className="text-red-400 text-sm">
-                {state.errors.tags}
-              </p>
-            )}
-          </div>
-          <div className="space-y-1">
-            <Label
-              htmlFor="description"
-              className={cn(state.errors?.description && "text-red-400")}
-            >
-              Description <span aria-hidden="true">*</span>
-            </Label>
-            <Textarea
-              id="description"
-              name="description"
-              placeholder="Describe the issue you're reporting..."
-              className={cn(
-                "bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-500",
-                state.errors?.description &&
-                  "border-red-400 focus-visible:ring-red-400"
-              )}
-              disabled={pending}
-              aria-invalid={!!state.errors?.description}
-              aria-errormessage="error-description"
-              defaultValue={state.defaultValues.description as string}
-            />
-            {state.errors?.description && (
-              <p id="error-description" className="text-red-400 text-sm">
-                {state.errors.description}
-              </p>
-            )}
-          </div>
-          <div className="space-y-1">
-            <Label
-              htmlFor="image"
-              className={cn(state.errors?.image && "text-red-400")}
-            >
-              Image <span aria-hidden="true">*</span>
-            </Label>
-            <div className="flex items-center justify-center w-full">
-              <label
-                htmlFor="image"
-                className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-700 border-dashed rounded-lg cursor-pointer bg-gray-800 hover:bg-gray-700"
-              >
-                {selectedImage ? (
-                  <img
-                    src={selectedImage}
-                    alt="Selected"
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <Upload className="w-8 h-8 mb-4 text-gray-400" />
-                    <p className="mb-2 text-sm text-gray-400">
-                      <span className="font-semibold">Click to upload</span> or
-                      drag and drop
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      PNG, JPG or WebP (MAX. 5MB)
-                    </p>
-                  </div>
-                )}
-                <Input
-                  id="image"
-                  name="image"
-                  type="file"
-                  accept="image/png, image/jpeg, image/webp"
-                  className="hidden"
-                  onChange={handleImageChange}
-                  disabled={pending}
-                />
-              </label>
-            </div>
-            {state.errors?.image && (
-              <p id="error-image" className="text-red-400 text-sm">
-                {state.errors.image}
-              </p>
-            )}
-          </div>
-        </CardContent>
-        <CardFooter>
-          <Button
-            type="submit"
-            disabled={pending}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+
+        <div className="mb-4">
+          <label htmlFor="description" className="block font-medium text-gray-700">Description</label>
+          <textarea
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="mt-1 block w-full p-2 border rounded-md"
+            required
+          />
+        </div>
+
+        <div className="mb-4">
+          <label htmlFor="imageUrl" className="block font-medium text-gray-700">Image URL</label>
+          <input
+            id="imageUrl"
+            type="url"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            className="mt-1 block w-full p-2 border rounded-md"
+            required
+          />
+        </div>
+
+        <div className="mb-4">
+          <label htmlFor="type" className="block font-medium text-gray-700">Type</label>
+          <select
+            id="type"
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+            className="mt-1 block w-full p-2 border rounded-md"
+            required
           >
-            {pending ? "Submitting..." : "Submit Report"}
-          </Button>
-        </CardFooter>
+            <option value="">Select Type</option>
+            <option value="incident">Incident</option>
+            <option value="event">Event</option>
+            <option value="point of interest">Point of Interest</option>
+          </select>
+        </div>
+
+        <div className="flex justify-between">
+          <button
+            type="button"
+            onClick={onClose}
+            className="bg-gray-300 px-4 py-2 rounded-md"
+          >
+            Close
+          </button>
+          <button
+            type="submit"
+            className="bg-blue-500 text-white px-4 py-2 rounded-md"
+          >
+            Submit
+          </button>
+        </div>
       </form>
-    </Card>
+    </div>
   );
-}
+};
