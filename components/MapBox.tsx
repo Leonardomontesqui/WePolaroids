@@ -116,7 +116,7 @@ export default function MapBox() {
   useEffect(() => {
     if (mapRef.current || !mapContainerRef.current) return;
 
-    mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+    mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
     try {
       mapRef.current = new mapboxgl.Map({
