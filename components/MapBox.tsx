@@ -75,7 +75,7 @@ export default function MapBox() {
         <div class="bg-white flex flex-col justify-center items-center rounded-lg shadow-lg p-2 border border-gray-200 w-[130px] h-[150px] hover:shadow-xl transition-all duration-300 my-auto">
           <img src="${memory.image_url}" 
                alt="${memory.title}"
-               class="w-20 h-20 object-cover rounded-lg mb-1" />
+               class="w-[100px] h-20 object-cover rounded-lg mb-1" />
         </div>
         
         <!-- Hover Card -->
