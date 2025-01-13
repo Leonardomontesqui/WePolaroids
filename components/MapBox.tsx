@@ -194,7 +194,7 @@ export default function MapBox() {
       <div ref={mapContainerRef} className="h-full w-full" />
 
       {selectedLocation && (
-        <div className="absolute md:top-4 md:right-4 w-80 z-50 top-4 mr-4 ml-5">
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 z-50 md:top-4 md:right-4 md:translate-x-0 md:translate-y-0 md:left-auto md:transform-none">
           <ReportForm
             location={selectedLocation}
             onClose={clearCurrentMarker}

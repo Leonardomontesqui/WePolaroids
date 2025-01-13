@@ -19,7 +19,7 @@ export const reportFormSchema = z.object({
     .max(1000, { message: "Description must be at most 1000 characters" }),
   image: z
     .instanceof(File)
-    .refine((file) => file.size <= 1000000, "File size must be less than 1MB")
+    .refine((file) => file.size <= 5000000, "File size must be less than 5MB")
     .refine(
       (file) => ["image/jpeg", "image/png", "image/webp"].includes(file.type),
       "Only .jpg, .png, and .webp formats are supported"

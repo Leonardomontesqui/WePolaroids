@@ -86,7 +86,7 @@ export function ReportForm({
   // };
 
   return (
-    <Card className={cn("w-full max-w-md bg-cream text-semiBlack", className)}>
+    <Card className={cn("w-full bg-cream text-semiBlack", className)}>
       <CardHeader>
         <div className="flex justify-between items-center w-full">
           <div>
@@ -232,7 +232,7 @@ export function ReportForm({
                       drag and drop
                     </p>
                     <p className="text-xs text-gray-500">
-                      PNG, JPG or WebP (MAX. 1MB)
+                      PNG, JPG or WebP (MAX. 5MB)
                     </p>
                   </div>
                 )}
