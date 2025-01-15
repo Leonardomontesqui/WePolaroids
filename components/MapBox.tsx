@@ -119,12 +119,28 @@ export default function MapBox() {
     mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
     try {
+      // First set a default location in case geolocation fails
       mapRef.current = new mapboxgl.Map({
         container: mapContainerRef.current,
         style: "mapbox://styles/mapbox/outdoors-v12",
         center: [-79.9178, 43.263],
-        zoom: 15,
+        zoom: 1,
       });
+
+      // Try to get user's location
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            mapRef.current?.flyTo({
+              center: [position.coords.longitude, position.coords.latitude],
+              zoom: 15,
+            });
+          },
+          (error) => {
+            console.error("Error getting location:", error);
+          }
+        );
+      }
 
       // Add click handler after map loads
       mapRef.current.on("load", () => {
