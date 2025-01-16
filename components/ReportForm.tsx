@@ -232,7 +232,7 @@ export function ReportForm({
                       drag and drop
                     </p>
                     <p className="text-xs text-gray-500">
-                      PNG, JPG or WebP (MAX. 5MB)
+                      PNG, JPG/JPEG or WebP (MAX. 5MB)
                     </p>
                   </div>
                 )}
@@ -240,7 +240,7 @@ export function ReportForm({
                   id="image"
                   name="image"
                   type="file"
-                  accept="image/png, image/jpeg, image/webp"
+                  accept="image/png, image/jpeg, image/jpg, image/webp"
                   className="hidden"
                   onChange={handleImageChange}
                   disabled={pending}
