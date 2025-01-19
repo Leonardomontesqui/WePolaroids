@@ -1,21 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 
 import { createCustomMarker } from "../utils/mapHelpers";
-import { fetchMemories, subscribeToMemories } from "../services/memoryService";
+import { fetchPosts, subscribeToMemories } from "./useUser";
 
 export const useMemories = (mapRef: React.RefObject<mapboxgl.Map | null>) => {
   const [memories, setMemories] = useState<any[]>([]);
+  const [selectedMemory, setSelectedMemory] = useState<Post | null>(null);
   const markersRef = useRef<{ [key: string]: mapboxgl.Marker }>({});
 
   useEffect(() => {
     if (!mapRef.current) return;
 
-    const loadMemories = async () => {
-      const data = await fetchMemories();
-      setMemories(data);
-    };
-
-    loadMemories();
+    fetchPosts().then(setMemories);
 
     const unsubscribe = subscribeToMemories((newMemory) => {
       setMemories((prev) => [...prev, newMemory]);
@@ -34,7 +30,7 @@ export const useMemories = (mapRef: React.RefObject<mapboxgl.Map | null>) => {
     markersRef.current = {};
 
     memories.forEach((memory) => {
-      const marker = createCustomMarker(memory)
+      const marker = createCustomMarker(memory, setSelectedMemory)
         .setLngLat(memory.location)
         .addTo(mapRef.current!);
 
@@ -42,5 +38,5 @@ export const useMemories = (mapRef: React.RefObject<mapboxgl.Map | null>) => {
     });
   }, [memories]);
 
-  return { memories, markersRef };
+  return { memories, markersRef, selectedMemory };
 };

@@ -1,35 +1,27 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
-import mapboxgl from "mapbox-gl";
+import React, { useRef } from "react";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { ReportForm } from "./ReportForm";
 import { useMapbox } from "@/lib/hooks/useMapbox";
 import { useMemories } from "@/lib/hooks/useMemories";
+import PostTab from "./PostTab";
 
 export default function MapBox() {
   const mapContainerRef = useRef<HTMLDivElement>(null!);
-  const {
-    mapRef,
-    selectedLocation,
-    setSelectedLocation,
-    clearCurrentMarker,
-    handleMapClick,
-  } = useMapbox(mapContainerRef);
+  const { mapRef, selectedLocation, clearCurrentMarker } =
+    useMapbox(mapContainerRef);
 
-  const { memories, markersRef } = useMemories(mapRef);
+  const { selectedMemory } = useMemories(mapRef);
 
   return (
     <div className="relative h-screen w-full">
       <div ref={mapContainerRef} className="h-full w-full" />
 
-      {selectedLocation && (
-        <div className="absolute md:top-4 md:right-4 w-80 z-50 top-4 mr-4 ml-5">
-          <ReportForm
-            location={selectedLocation}
-            onClose={clearCurrentMarker}
-          />
-        </div>
+      {selectedLocation && !selectedMemory && (
+        <ReportForm location={selectedLocation} onClose={clearCurrentMarker} />
       )}
+
+      {selectedMemory && <PostTab {...selectedMemory} />}
 
       <style jsx global>{`
         .custom-marker {
@@ -41,7 +33,7 @@ export default function MapBox() {
         }
         .memory-marker img {
           width: 64px;
-          height: 64px;
+          height: 80px;
           object-fit: cover;
         }
         .marker-container {

@@ -1,4 +1,4 @@
-import { createSupabaseClient } from "./supabase/client";
+import { createSupabaseClient } from "../supabase/client";
 
 interface Data_Post {
   title: string;
@@ -13,7 +13,7 @@ export const uploadImage = async (file: File) => {
   try {
     const fileName = `${Date.now()}-${file.name}`;
     const { error } = await supabase.storage
-      .from("image_uploads") // Make sure this bucket exists in your Supabase
+      .from("image_uploads")
       .upload(fileName, file, {
         cacheControl: "3600",
         upsert: false,
@@ -24,9 +24,8 @@ export const uploadImage = async (file: File) => {
       return null;
     }
 
-    // Get the public URL using the same bucket name
     const { data: publicUrlData } = supabase.storage
-      .from("image_uploads") // Use the same bucket name here
+      .from("image_uploads")
       .getPublicUrl(fileName);
 
     return publicUrlData?.publicUrl;
@@ -50,10 +49,22 @@ export const createPost = async (postData: Data_Post) => {
 };
 
 export const fetchPosts = async () => {
-  const { data, error } = await supabase.from("memories2").select();
-  if (error) {
-    console.error("Error fetching posts:", error.message);
-    return null;
-  }
+  const { data, error } = await supabase.from("memories2").select("*");
+  if (error) throw new Error("Failed to fetch memories");
   return data;
+};
+
+export const subscribeToMemories = (
+  callback: (arg0: { [key: string]: any }) => void
+) => {
+  const subscription = supabase
+    .channel("memories2_changes")
+    .on(
+      "postgres_changes",
+      { event: "INSERT", schema: "public", table: "memories2" },
+      (payload) => callback(payload.new)
+    )
+    .subscribe();
+
+  return () => subscription.unsubscribe();
 };

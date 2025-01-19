@@ -2,7 +2,7 @@
 
 import { reportFormSchema } from "@/lib/schema";
 import { z } from "zod";
-import { uploadImage, createPost } from "./useUser";
+import { uploadImage, createPost } from "./hooks/useUser";
 
 export async function reportFormAction(
   _prevState: unknown,

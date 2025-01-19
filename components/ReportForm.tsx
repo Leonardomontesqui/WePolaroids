@@ -86,7 +86,7 @@ export function ReportForm({
   // };
 
   return (
-    <Card className={cn("w-full bg-cream text-semiBlack", className)}>
+    <Card className="bg-cream text-semiBlack absolute md:top-4 md:right-4 w-80 z-50 top-4 mr-4 ml-5">
       <CardHeader>
         <div className="flex justify-between items-center w-full">
           <div>
