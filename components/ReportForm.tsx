@@ -92,15 +92,13 @@ export function ReportForm({
           <div>
             <CardTitle>Leave your mark</CardTitle>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
+
+          <button
             className="text-semiBlack hover:text-gray-300"
-            aria-label="Close form"
             onClick={onClose}
           >
-            <X className="h-4 w-4" />
-          </Button>
+            <X className="h-5 w-5" />
+          </button>
         </div>
       </CardHeader>
       <form action={formAction}>

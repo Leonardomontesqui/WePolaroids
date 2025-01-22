@@ -38,5 +38,5 @@ export const useMemories = (mapRef: React.RefObject<mapboxgl.Map | null>) => {
     });
   }, [memories]);
 
-  return { memories, markersRef, selectedMemory };
+  return { memories, markersRef, selectedMemory, setSelectedMemory };
 };
