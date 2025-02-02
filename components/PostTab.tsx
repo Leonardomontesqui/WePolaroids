@@ -1,3 +1,4 @@
+import { Post } from "@/lib/types";
 import { X } from "lucide-react";
 import React from "react";
 

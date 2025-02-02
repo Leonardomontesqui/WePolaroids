@@ -1,4 +1,5 @@
 import mapboxgl from "mapbox-gl";
+import { Post } from "../types";
 
 export const createCustomMarker = (
   memory: {
@@ -6,7 +7,7 @@ export const createCustomMarker = (
     title: string;
     description: string;
   },
-  onClick: (memory: any) => void
+  onClick: (memory: Post) => void
 ) => {
   const el = document.createElement("div");
   el.className = "memory-marker";
@@ -36,7 +37,7 @@ export const createCustomMarker = (
   });
 
   container?.addEventListener("click", () => {
-    onClick(memory);
+    onClick(memory as Post);
   });
 
   return new mapboxgl.Marker({ element: el, anchor: "bottom" });
