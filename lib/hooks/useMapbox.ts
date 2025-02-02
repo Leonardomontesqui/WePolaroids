@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 
 export const useMapbox = (mapContainerRef: React.RefObject<HTMLDivElement>) => {

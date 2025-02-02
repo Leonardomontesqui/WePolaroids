@@ -1,4 +1,5 @@
 import { createSupabaseClient } from "@/lib/supabase/client";
+import { Post } from "../types";
 
 const supabase = createSupabaseClient();
 
@@ -8,15 +9,13 @@ export const fetchMemories = async () => {
   return data;
 };
 
-export const subscribeToMemories = (
-  callback: (arg0: { [key: string]: any }) => void
-) => {
+export const subscribeToMemories = (callback: (memory: Post) => void) => {
   const subscription = supabase
     .channel("memories2_changes")
     .on(
       "postgres_changes",
       { event: "INSERT", schema: "public", table: "memories2" },
-      (payload) => callback(payload.new)
+      (payload) => callback(payload.new as Post)
     )
     .subscribe();
 

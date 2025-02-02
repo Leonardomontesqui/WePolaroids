@@ -1,5 +1,4 @@
-import { HeartIcon } from "@radix-ui/react-icons";
-import { Heart, X } from "lucide-react";
+import { X } from "lucide-react";
 import React from "react";
 
 export default function PostTab({

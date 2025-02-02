@@ -32,7 +32,6 @@ const tags = [
 ];
 
 export function ReportForm({
-  className,
   location,
   onClose,
 }: React.ComponentProps<typeof Card> & {

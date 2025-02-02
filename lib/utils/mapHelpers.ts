@@ -6,7 +6,7 @@ export const createCustomMarker = (
     title: string;
     description: string;
   },
-  onClick: Function
+  onClick: (memory: any) => void
 ) => {
   const el = document.createElement("div");
   el.className = "memory-marker";

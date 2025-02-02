@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from "react";
 
 import { createCustomMarker } from "../utils/mapHelpers";
 import { fetchPosts, subscribeToMemories } from "./useUser";
+import { Post } from "../types";
 
 export const useMemories = (mapRef: React.RefObject<mapboxgl.Map | null>) => {
-  const [memories, setMemories] = useState<any[]>([]);
+  const [memories, setMemories] = useState<Post[]>([]);
   const [selectedMemory, setSelectedMemory] = useState<Post | null>(null);
   const markersRef = useRef<{ [key: string]: mapboxgl.Marker }>({});
 
@@ -14,7 +15,7 @@ export const useMemories = (mapRef: React.RefObject<mapboxgl.Map | null>) => {
     fetchPosts().then(setMemories);
 
     const unsubscribe = subscribeToMemories((newMemory) => {
-      setMemories((prev) => [...prev, newMemory]);
+      setMemories((prev) => [...prev, newMemory as Post]);
     });
 
     return () => {
