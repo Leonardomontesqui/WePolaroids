@@ -85,7 +85,7 @@ export function ReportForm({
   // };
 
   return (
-    <Card className="bg-cream text-semiBlack absolute md:top-4 md:right-4 w-80 z-50 top-4 mr-4 ml-5">
+    <Card className="bg-cream text-semiBlack absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 md:top-4 md:right-4 md:translate-x-0 md:translate-y-0 md:left-auto w-80 z-50">
       <CardHeader>
         <div className="flex justify-between items-center w-full">
           <div>

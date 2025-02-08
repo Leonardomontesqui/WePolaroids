@@ -10,7 +10,7 @@ export default function PostTab({
   setSelectedPost: (post: Post | null) => void;
 }) {
   return (
-    <div className="bg-white absolute md:top-4 md:right-4 w-80 z-50 top-4 mr-4 ml-5 flex flex-col items-center rounded-lg p-4 gap-2 shadow-lg">
+    <div className="bg-white absolute md:top-4 md:right-4 w-80 z-40 top-4 mr-4 ml-5 flex flex-col items-center rounded-lg p-4 gap-2 shadow-lg">
       <header className="w-full">
         <button className="float-right" onClick={() => setSelectedPost(null)}>
           <X color="#7a7a7a" />
@@ -23,11 +23,6 @@ export default function PostTab({
         {post.title}
       </div>
       <div className="text-left w-full">{post.description}</div>
-      {/* <div className="justify-left w-full">
-        <button>
-          <Heart />
-        </button>
-      </div> */}
     </div>
   );
 }
